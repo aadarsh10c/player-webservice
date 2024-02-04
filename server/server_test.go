@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,7 +9,7 @@ import (
 
 func TestGETPlayers(t *testing.T) {
 	t.Run("return pepper's score", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
+		request, _ := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
 		PlayerServer(response, request)
@@ -19,7 +20,7 @@ func TestGETPlayers(t *testing.T) {
 		assertScore(got, want, t)
 	})
 	t.Run("get Floyd's Score", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
+		request, _ := newGetScoreRequest("Floyd")
 		response := httptest.NewRecorder()
 
 		PlayerServer(response, request)
@@ -30,6 +31,10 @@ func TestGETPlayers(t *testing.T) {
 		assertScore(got, want, t)
 
 	})
+}
+
+func newGetScoreRequest(name string) (*http.Request, error) {
+	return http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
 }
 
 func assertScore(got string, want string, t *testing.T) {
