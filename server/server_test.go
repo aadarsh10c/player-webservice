@@ -8,12 +8,17 @@ import (
 )
 
 type StubPlayerStore struct {
-	score map[string]int
+	score    map[string]int
+	winCalls []string
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	score := s.score[name]
 	return score
+}
+
+func (s *StubPlayerStore) RecordWin(name string) {
+	s.winCalls = append(s.winCalls, name)
 }
 
 func TestGETPlayers(t *testing.T) {
@@ -22,6 +27,7 @@ func TestGETPlayers(t *testing.T) {
 			"Pepper": 20,
 			"Floyd":  10,
 		},
+		nil,
 	}
 	server := &PlayerServer{&store}
 	t.Run("return pepper's score", func(t *testing.T) {
@@ -65,24 +71,35 @@ func TestGETPlayers(t *testing.T) {
 func TestStoreWins(t *testing.T) {
 	store := StubPlayerStore{
 		map[string]int{},
+		nil,
 	}
 	server := PlayerServer{&store}
 
 	t.Run("it returns accepted on POST", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
+		request, _ := newPostWinRequest("Pepper")
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
 
-		assertStatus(response.Code,http.StatusAccepted,t)
+		assertStatus(response.Code, http.StatusAccepted, t)
+
+		if len(store.winCalls) != 1 {
+			t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+		}
 	})
 }
+
+
 
 func assertStatus(got int, want int, t *testing.T) {
 	t.Helper()
 	if got != want {
 		t.Errorf("Got %d, wanted %d", got, want)
 	}
+}
+
+func newPostWinRequest(name string) (*http.Request, error) {
+	return http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
 }
 
 func newGetScoreRequest(name string) (*http.Request, error) {
