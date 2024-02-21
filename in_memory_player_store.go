@@ -3,7 +3,7 @@ package main
 import "github.com/aadarsh10c/player-webservice/server"
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-	return &InMemoryPlayerStore{map[string]int{}}
+	return new(InMemoryPlayerStore)
 }
 
 func NewPlayerServer(store server.PlayerStore) *server.PlayerServer {
@@ -22,5 +22,9 @@ func (i *InMemoryPlayerStore) RecordWin(name string) {
 	i.store[name]++
 }
 func (i *InMemoryPlayerStore) GetLeague() []server.Player {
-	return nil
+	var league []server.Player
+	for name, wins := range i.store {
+		league = append(league, server.Player{Name: name, Wins: wins})
+	}
+	return league
 }
