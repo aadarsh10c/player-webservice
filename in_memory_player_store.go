@@ -3,7 +3,7 @@ package main
 import "github.com/aadarsh10c/player-webservice/server"
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-	return new(InMemoryPlayerStore)
+	return &InMemoryPlayerStore{map[string]int{}}
 }
 
 func NewPlayerServer(store server.PlayerStore) *server.PlayerServer {
